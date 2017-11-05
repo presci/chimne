@@ -8,6 +8,7 @@ import uuid
 import time
 import urllib
 import urllib2
+import requests
 
 
 
@@ -65,30 +66,16 @@ def oauthheader(parser, o_method, o_url, o_body):
     _basickey=createBasicKeyObj(parser, method=o_method, url=o_url, body=o_body)
     _with_nonce_ts=createbasestring(_basickey)
     signatureready=createsignaturebasestr(_basickey, _with_nonce_ts)
-    print "---------------"
-    print signatureready
-    print "--------------"
     signature=createsignature(parser, signatureready)
-    print "--------------"
-    print signature
-    print "--------------"
     oauthheader=createOAuthHeader(_basickey, _with_nonce_ts, signature)
     header = {'Authorization': oauthheader, 'User-Agent': 'OAuth gem v0.4.4'}
     return header
 
 
-
-
 def postmessage(parser, postbody):
     header = oauthheader(parser, "POST", "https://api.twitter.com/1.1/statuses/update.json", postbody)
-    data = "status=" + tw_util.percentencode(postbody)
-    try:
-        request = urllib2.Request('https://api.twitter.com/1.1/statuses/update.json', data, header)
-        response = urllib2.urlopen(request)
-        print response.read()
-    except urllib2.HTTPError as e:
-        error_message = e.read()
-        print error_message    
+    response = requests.post('https://api.twitter.com/1.1/statuses/update.json', data={'status':postbody}, headers=header)
+    print response.content
 
 
 def postimage(parser, imagepath):
@@ -100,8 +87,8 @@ def postimage(parser, imagepath):
 
 parser = SafeConfigParser()
 parser.read("chimne.cfg")
-# postmessage(parser, "hello road world")
-postimage(parser, "/helloworld.jpg")
+postmessage(parser, "hello big river")
+#postimage(parser, "/helloworld.jpg")
     
 
 
